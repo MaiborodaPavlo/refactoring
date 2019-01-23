@@ -1,65 +1,68 @@
+
+/* global Promise */
+
 /**
  * Глобальная вероятность успеха для удобства тестирования
  */
-const GLOBAL_PROPABILITY = 1;
-const BAD_JSON_PROPABILITY = 0;
+const GLOBAL_PROPABILITY = 0.9;
+const BAD_JSON_PROPABILITY = 0.1;
+
 
 /**
  * Получить все записи из хранилища
- * @param {callable} onAnswer Функция, обрабатывающая ответ от сервера в формате JSON 
  */
-export function all(onAnswer){
-    TimeoutPropabiliry(300, GLOBAL_PROPABILITY, () => {
-        onAnswer(serverAnswer(articlesStorage));
-    }, () => {
-        onAnswer(serverAnswer('', 100500, "Propability Error"));
+export async function all(){
+    return TimeoutPropabiliry(300, GLOBAL_PROPABILITY).then(() => {
+            return serverAnswer(articlesStorage);
+        }, () => {
+            throw new Error("Propability Error in articles list");
     });
 }
 
 /**
  * Получить статью по id
  * @param {int} id Id статьи
- * @param {callable} onAnswer Функция, обрабатывающая ответ от сервера в формате JSON 
  */
-export function get(id, onAnswer){
-    TimeoutPropabiliry(300, GLOBAL_PROPABILITY, () => {
-        onAnswer(serverAnswer(articlesStorage[mapArticles[id]]));
-    }, () => {
-        onAnswer(serverAnswer('', 100500, "Propability Error"));
+export async function get(id){
+    return TimeoutPropabiliry(300, GLOBAL_PROPABILITY).then(() => {
+            return serverAnswer(articlesStorage[mapArticles[id]]);
+        }, () => {
+            throw new Error("Propability Error in articles one");
     });
 }
 
 /**
  * Удалить статью из базы
  * @param {int} id Id статьи
- * @param {callable} onAnswer Функция, обрабатывающая ответ от сервера в формате JSON  
  */
-export function remove(id, onAnswer){
-    TimeoutPropabiliry(300, GLOBAL_PROPABILITY, () => {
-        if(id in mapArticles){
-            let num = mapArticles[id];
-            delete mapArticles[id];
-            articlesStorage.splice(num, 1);
-            onAnswer(serverAnswer(true));
-        }
-        else{
-            onAnswer(false);
-        }
-    }, () => {
-        onAnswer(serverAnswer('', 100500, "Propability Error"));
+export async function remove(id){
+    return TimeoutPropabiliry(300, GLOBAL_PROPABILITY).then(() => {
+            if(id in mapArticles){
+                let num = mapArticles[id];
+                delete mapArticles[id];
+                articlesStorage.splice(num, 1);
+                return serverAnswer(true);
+            }
+            else{
+                return serverAnswer(false);
+            }
+        }, () => {
+            throw new Error("Propability Error in articles delete");
     });
 }
 
 /* полуприватная часть, вдруг захотите сделать промис :) */
-function TimeoutPropabiliry(time, probability, onSuccess, onError){
-    window.setTimeout(() => {
-        Math.random() < probability ? onSuccess() : onError();
-    }, time);
+function TimeoutPropabiliry(time, probability){
+    return new Promise((resolve, reject) => {
+        window.setTimeout(() => {
+            Math.random() < probability ? resolve() : reject();
+        }, time)
+    });
 }
 
 function serverAnswer(data, code = 200, status = "OK"){
     if(Math.random() < BAD_JSON_PROPABILITY){
-        return 'incoorect json';
+        throw new Error('Incorrect json');
     }
 
     return JSON.stringify({
@@ -73,7 +76,7 @@ function serverAnswer(data, code = 200, status = "OK"){
 let articlesStorage = [
     {
         id: 1,
-        title: 'Профисификация кода',
+        title: 'Промисификация кода',
         dt: '2018-12-06',
         text: 'Код без промисов бывает жестью, но и с ними можно изобразить много странного.'
     },

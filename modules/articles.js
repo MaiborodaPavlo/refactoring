@@ -1,42 +1,24 @@
 import * as serverApi from './db';
 
-function all(onSuccess, onError){
-    serverApi.all((response) => {
-        let info = JSON.parse(response);
+async function request(func, arg = null) {
 
-        if(info.code === 200){
-            onSuccess(info.data);
-        }
-        else{
-            onError(info.status);
-        }
-    });
+    let response = await func(arg);
+    if (response) return JSON.parse(response).data;
 }
 
-function one(id, onSuccess, onError){
-    serverApi.get(id, (response) => {
-        let info = JSON.parse(response);
+async function all(){
 
-        if(info.code === 200){
-            onSuccess(info.data);
-        }
-        else{
-            onError(info.status);
-        }
-    });
+    return request(serverApi.all);
 }
 
-function remove(id, onSuccess, onError){
-    serverApi.remove(id, (response) => {
-        let info = JSON.parse(response);
+async function one(id){
 
-        if(info.code === 200){
-            onSuccess(info.data);
-        }
-        else{
-            onError(info.status);
-        }
-    });
+    return request(serverApi.get, id);
+}
+
+async function remove(id){
+
+    return request(serverApi.remove, id);
 }
 
 export {all, one, remove};
