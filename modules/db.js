@@ -11,11 +11,9 @@ const BAD_JSON_PROPABILITY = 0.1;
 /**
  * Получить все записи из хранилища
  */
-export async function all(){
+export function all(){
     return TimeoutPropabiliry(300, GLOBAL_PROPABILITY).then(() => {
-            return serverAnswer(articlesStorage);
-        }, () => {
-            throw new Error("Propability Error in articles list");
+        return serverAnswer(articlesStorage);
     });
 }
 
@@ -23,11 +21,9 @@ export async function all(){
  * Получить статью по id
  * @param {int} id Id статьи
  */
-export async function get(id){
+export function get(id){
     return TimeoutPropabiliry(300, GLOBAL_PROPABILITY).then(() => {
-            return serverAnswer(articlesStorage[mapArticles[id]]);
-        }, () => {
-            throw new Error("Propability Error in articles one");
+        return serverAnswer(articlesStorage[mapArticles[id]]);
     });
 }
 
@@ -35,19 +31,17 @@ export async function get(id){
  * Удалить статью из базы
  * @param {int} id Id статьи
  */
-export async function remove(id){
+export function remove(id){
     return TimeoutPropabiliry(300, GLOBAL_PROPABILITY).then(() => {
-            if(id in mapArticles){
-                let num = mapArticles[id];
-                delete mapArticles[id];
-                articlesStorage.splice(num, 1);
-                return serverAnswer(true);
-            }
-            else{
-                return serverAnswer(false);
-            }
-        }, () => {
-            throw new Error("Propability Error in articles delete");
+        if(id in mapArticles){
+            let num = mapArticles[id];
+            delete mapArticles[id];
+            articlesStorage.splice(num, 1);
+            return serverAnswer(true);
+        }
+        else{
+            return serverAnswer(false);
+        }
     });
 }
 
@@ -55,14 +49,16 @@ export async function remove(id){
 function TimeoutPropabiliry(time, probability){
     return new Promise((resolve, reject) => {
         window.setTimeout(() => {
-            Math.random() < probability ? resolve() : reject();
+            Math.random() < probability ? resolve() : reject({
+                message: "Propability Error"
+            });
         }, time)
     });
 }
 
 function serverAnswer(data, code = 200, status = "OK"){
     if(Math.random() < BAD_JSON_PROPABILITY){
-        throw new Error('Incorrect json');
+        return 'Incorrect json';
     }
 
     return JSON.stringify({
